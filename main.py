@@ -13,47 +13,47 @@ class Base:
     def __init__(self):
         self.log = []
 
-    def add_to_log(self, message):
+    def add_to_log(self, message):   #Method to add log messages
         self.log.append(message)
 
-class Item(Base):
+class Item(Base):  #Item class represents items that can be found or used in the game
     def __init__(self, name, description):
         super().__init__()
         self.name = name
         self.description = description
 
-class Room(Base):
+class Room(Base): #Room class represents different rooms in the game, each with its own description and items
     def __init__(self, name, description, items=None):
         super().__init__()
         self.name = name
         self.description = description
         self.items = items if items else []
 
-    def add_item(self, item):
+    def add_item(self, item):     #Method to add items to the room
         self.items.append(item)
 
-class Player(Base):
+class Player(Base): #Player class represents the player in the game, with health, inventory, and actions
     def __init__(self, name, health=100, inventory=None):
         super().__init__()
         self.name = name
         self.health = health
         self.inventory = inventory if inventory else []
 
-    def add_to_inventory(self, item):
+    def add_to_inventory(self, item):  #Method to add items to the player's inventory
         self.inventory.append(item)
 
-    def display_inventory(self):
+    def display_inventory(self):    #Method to display the player's inventory
         print("Inventory:")
         for item in self.inventory:
             print("-", item.name)
 
-    def save_player(self, file):
+    def save_player(self, file):     #Method to save the player's data to a file
         file.write(f"{self.name}|{self.health}|")
         for item in self.inventory:
             file.write(f"{item.name},{item.description}|")
         file.write("\n")
 
-    def load_player(self, file):
+    def load_player(self, file): #Method to load the player's game from a file
         player_data = file.readline().strip().split("|")
         self.name = player_data[0]
         self.health = int(player_data[1])
@@ -62,7 +62,7 @@ class Player(Base):
             item_info = item_data.split(",")
             self.inventory.append(Item(item_info[0], item_info[1]))
 
-class Game(Base):
+class Game(Base): #Game class represents the main game logic, including navigation, actions, and saving or loading
     def __init__(self, player, rooms):
         super().__init__()
         self.player = player
@@ -70,21 +70,21 @@ class Game(Base):
         self.current_room = None
         self.ending_room = rooms[-1]  #Last room as the ending room
 
-    def start_game(self):
+    def start_game(self): #Method to start the game
         self.add_to_log("The Escape has Started...")
         print("Welcome to Dave's Escape Room! Hopefully you can find a way out, because you don't want to know what happens if you can't...And also, you're in my house, in my living room right now so, you know, be courteous.")
         self.current_room = self.rooms[0]
         self.play()
 
-    def play(self):
+    def play(self): #Main Gameplay
         while True:
-            print("\n" + "-" * 40)
+            print("\n" + "-" * 40) #Seperation in the terminal for visual effect
             print("You are now in the", self.current_room.name)
             print(self.current_room.description)
             print("There are these items in the room:", [item.name for item in self.current_room.items])
 
             action = input("What would you like to do? (type 'help' for options): ").lower().strip()
-
+            #Player's actions
             if action == 'help':
                 self.add_to_log("You need help? Already? At this rate, you'll be here forever...")
                 self.display_help()
@@ -125,7 +125,7 @@ class Game(Base):
             else:
                 self.add_to_log("Player entered an invalid action.")
                 print("Invalid action. Type 'help' for options.")
-
+            #Check to see if the game has been completed
             if self.current_room == self.ending_room:
                 if self.check_escape():
                     self.add_to_log("Player escaped successfully.")
@@ -137,10 +137,10 @@ class Game(Base):
                         print("You won't be gone for long...")
                         break
 
-    def display_help(self):
+    def display_help(self): #Method to display availiable actions
         print("Available actions: move, search, take, use, inventory, save, load, quit")
 
-    def move(self):
+    def move(self): #Method for player movement
         direction = input("Which direction do you want to move? (up/back/right/left): ").lower().strip()
         next_room = None
         if direction in ['up', 'back', 'right', 'left']:
@@ -151,7 +151,7 @@ class Game(Base):
         else:
             print("Invalid direction.")
 
-    def search_room(self):
+    def search_room(self): #Method to search the room the player is currently in for items
         print("You decide to search around the room...")
         if self.current_room.items:
             print("You found these items:")
@@ -160,7 +160,7 @@ class Game(Base):
         else:
             print("You found nothing in this room. Maybe move and try the next room?")
 
-    def take_item(self):
+    def take_item(self):     #Method to allow the player to take an item from the current room
         item_name = input("Which item do you think could help you out in the future and you want to take? ").strip()
         for item in self.current_room.items:
             if item.name.lower() == item_name.lower():
@@ -170,7 +170,7 @@ class Game(Base):
                 return
         print(f"No '{item_name}' found in this room.")
 
-    def use_item(self):
+    def use_item(self):     # Method to allow the player to use an item from their inventory
         if not self.player.inventory:
             print("Your inventory is empty. Go take something. Can't escape with an empty inventory.")
             return
@@ -184,7 +184,7 @@ class Game(Base):
                     return False
         print(f"No '{item_name}' found in your inventory.")
 
-    def check_escape(self):
+    def check_escape(self):     # Method to check if the player has escaped
         for item in self.player.inventory:
             if item.name.lower() == 'key':
                 print("You insert the key into the door lock...")
@@ -192,31 +192,31 @@ class Game(Base):
         print("You need a key to escape...there's a keyhole. Where did you see a key? Seriously though, you're in an escape room and you saw a key and didn't take it? Must be a first timer.")
         return False
 
-    def display_ending(self):
-        print("\n" + "-" * 40)
+    def display_ending(self):    #Method to display the ending message when the player escapes
+        print("\n" + "-" * 40)  
         print("You have finally escaped from Dave's Escape Room...took you long enough. See you soon though!")
 
-    def save_game(self):
+    def save_game(self):     #Method to save the current game state to a file
         filename = input("Enter the filename to save the game: ")
         try:
-            with open(filename, 'w') as file:
+            with open(filename, 'w') as file:     #Open the specified file in write mode
                 self.player.save_player(file)
-                self.add_to_log("Game saved successfully.")
+                self.add_to_log("Game saved successfully.")   #Add a log entry indicating successful game saving
                 print("Game saved successfully.")
         except Exception as e:
             print(f"An error occurred while saving the game: {e}")
 
-    def load_game(self):
+    def load_game(self):     #Method to load a previously saved game state from a file
         filename = input("Enter the filename to load the game: ")
         try:
-            with open(filename, 'r') as file:
+            with open(filename, 'r') as file:       #Open the specified file in read mode
                 self.player.load_player(file)
-                self.add_to_log("Game loaded successfully.")
+                self.add_to_log("Game loaded successfully.")     #Add a log entry indicating successful game loading
                 print("Game loaded successfully.")
-        except Exception as e:
+        except Exception as e:      #If an error occurs during file handling, display an error message
             print(f"An error occurred while loading the game: {e}")
 
-
+#Define initial items and rooms
 item1 = Item("Key", "A rusty big key that looks ancient.")
 item2 = Item("Flashlight", "A flashlight that barely works, but gets the job done.")
 item3 = Item("Book", "An dusty, old book...'The Old Man and the Sea'")
@@ -231,6 +231,10 @@ game = Game(player, [room1, room2, ending_room])
 
 # Start the game
 game.start_game()
+
+
+
+
 
 
 
